@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.jsx';
-import './index.css'; // This is required for Tailwind to be processed by react-scripts
+import App from './App'; 
+import './index.css';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
