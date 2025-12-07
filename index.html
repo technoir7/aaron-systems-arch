@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aaron Fung: Systems Architect | technoir7</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load React Libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Load Babel for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* General Setup */
+        body {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+        }
+        /* Style for the blur background on the header for better contrast */
+        #header-sticky {
+            background-color: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(8px);
+        }
+        /* Fix for react-scripts default build style */
+        .App {
+            min-height: 100vh;
+        }
+        /* Custom animation for grayscale image hover */
+        .image-tile img {
+            transition: all 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Lucide icons are used here by defining them globally via an assumed function
+        // For simplicity in a single-file build, we use inline styling and simple elements 
+        // to represent the icon functionality and visual aesthetic.
+        
+        // Icon Components (Replaced with SVG paths for single-file use)
+        const Icon = ({ children, className, size=16, color="currentColor" }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke={color} 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className={className}
+            >
+                {children}
+            </svg>
+        );
+
+        // DEFINED ICONS (FIXED)
+        const Zap = (props) => <Icon {...props}><path d="M13 2L3 14h9l-1 8L22 10h-9l1-8z"></path></Icon>;
+        const Cpu = (props) => <Icon {...props}><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><polyline points="9 9 14 14 9 14 14 9"></polyline></Icon>;
+        const Brain = (props) => <Icon {...props}><path d="M12 12c2.25 0 4-2.167 4-4s-1.75-4-4-4-4 2.167-4 4 1.75 4 4 4z"></path><path d="M12 12c-2.25 0-4 2.167-4 4s1.75 4 4 4 4-2.167 4-4-1.75-4-4-4z"></path><path d="M12 12c2.25 0 4-2.167 4-4s-1.75-4-4-4-4 2.167-4 4 1.75 4 4 4z"></path></Icon>;
+        const Eye = (props) => <Icon {...props}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></Icon>;
+        const GitBranch = (props) => <Icon {...props}><line x1="6" y1="3" x2="6" y2="15"></line><line x1="18" y1="6" x2="18" y2="15"></line><path d="M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path><path d="M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path><path d="M18 8h-3a2 2 0 0 0-2 2v1"></path><path d="M13 10v4"></path></Icon>;
+        const BookOpen = (props) => <Icon {...props}><path d="M2 20h20"></path><path d="M6 2h14v16H6z"></path><path d="M6 20v-2h14V2"></path><path d="M18 6H6"></path><path d="M6 10h12"></path><path d="M6 14h10"></path></Icon>;
+        const Mail = (props) => <Icon {...props}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></Icon>;
+        const ExternalLink = (props) => <Icon {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></Icon>;
+        const ChevronRight = (props) => <Icon {...props}><polyline points="9 18 15 12 9 6"></polyline></Icon>;
+        const Database = (props) => <Icon {...props}><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M21 12A9 3 0 0 0 3 12"></path></Icon>;
+        const Terminal = (props) => <Icon {...props}><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></Icon>; // MISSING ICON ADDED
+
+
+        // --- CONFIGURATION & AESTHETICS ---
+        const DYNAMISM_ACCENT = "#3B82F6"; 
+        const BG_DARK = "#0a0a0a"; 
+        const TEXT_MAIN = "#e5e5e5"; 
+        
+        // --- DATA ASSETS ---
+        const PORTFOLIO_PREVIEW = [
+          { id: 1, src: "/images/fung_boots_2024_oil_18x24in_web.jpg", alt: "After Van Gogh's Boots", title: "Boots" },
+          { id: 2, src: "/images/fung_portrait-noa_2024_graphite_18x24in_web.jpg", alt: "As If Remembered", title: "Noa" },
+          { id: 3, src: "/images/fung_repin-masterstudy-dragomirova_oil_18x24in_web.jpg", alt: "Repin Study", title: "Repin" }
+        ];
+
+        const WRITING_LINKS = [
+          { title: "Formal Systems & The Limits of Representation", year: "2025", type: "Essay", tag: "Gödel/Logic" },
+          { title: "The Image as an Epistemic System", year: "2025", type: "Essay", tag: "Kant/AI" },
+          { title: "The Architecture of the Extended Mind", year: "Active", type: "System", tag: "Knowledge Ops" }
+        ];
+
+        // --- COMPONENTS ---
+        
+        const Badge = ({ text }) => (
+          <span className="px-3 py-1 bg-neutral-800/80 border border-neutral-700 rounded text-[10px] uppercase tracking-wider text-gray-300 hover:text-white hover:border-gray-500 transition-colors cursor-default">
+            {text}
+          </span>
+        );
+
+        function App() {
+          return (
+            <div className="App min-h-screen font-mono selection:bg-blue-500 selection:text-white pb-12" style={{ backgroundColor: BG_DARK, color: TEXT_MAIN }}>
+              
+              {/* --- HEADER: THE SIGNAL --- */}
+              <header id="header-sticky" className="px-6 py-8 border-b border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sticky top-0 z-50">
+                <div>
+                  <h1 className="text-xl font-bold tracking-tighter uppercase flex items-center gap-2">
+                    <Zap size={20} color={DYNAMISM_ACCENT} fill={DYNAMISM_ACCENT} />
+                    Aaron Fung
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-3 mt-1">
+                     <span className="text-[10px] md:text-xs text-gray-500 uppercase tracking-[0.2em] font-semibold">
+                       Systems Engineer
+                     </span>
+                     <span className="text-gray-700 text-[10px]">•</span>
+                     <span className="text-[10px] md:text-xs text-gray-500 uppercase tracking-[0.2em] font-semibold">
+                       Classically Trained Artist
+                     </span>
+                  </div>
+                </div>
+                <div className="flex flex-col md:flex-row gap-2 md:gap-6 text-[10px] font-bold uppercase tracking-widest">
+                  <span className="flex items-center gap-2 text-green-500 bg-green-900/10 px-3 py-1 rounded border border-green-900/30">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                    Open for Opportunities
+                  </span>
+                  <span className="text-gray-600 border border-gray-800 px-3 py-1 rounded flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-gray-600 rounded-full" />
+                    SF / Bay Area
+                  </span>
+                </div>
+              </header>
+
+              {/* --- MAIN GRID: THE BENTO BOX --- */}
+              <main className="p-4 md:p-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[minmax(180px,auto)]">
+
+                  {/* 1. HERO CARD: THE AGENT (Span 8) */}
+                  <div className="md:col-span-8 bg-neutral-900/40 border border-neutral-800 p-6 md:p-8 flex flex-col justify-between hover:border-blue-500/40 transition-all duration-300 group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] [mask-image:radial-gradient(ellipse_at_center,black,transparent)] pointer-events-none" />
+                    
+                    <div className="flex justify-between items-start z-10">
+                      <div className="bg-blue-500/10 text-blue-400 p-2 rounded mb-4 inline-flex border border-blue-500/20">
+                        <Cpu size={24} />
+                      </div>
+                      <span className="text-[9px] uppercase text-blue-400/80 tracking-widest border border-blue-900/30 bg-blue-900/10 px-2 py-1 rounded shadow-[0_0_10px_rgba(59,130,246,0.1)]">
+                        Active Build
+                      </span>
+                    </div>
+                    
+                    <div className="z-10 mt-2">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-3 text-white group-hover:text-blue-400 transition-colors">
+                        "Analyst" Agent (MCP Architecture)
+                      </h2>
+                      <p className="text-sm text-gray-400 leading-relaxed max-w-2xl border-l-2 border-gray-800 pl-4">
+                        A multi-agent autonomous due diligence system built on the <span className="text-gray-200 font-semibold">Model Context Protocol</span>. 
+                        Features a "Failure Lattice" for fault-tolerant scraping and strict Pydantic enforcement 
+                        to prevent context pollution.
+                      </p>
+                    </div>
+
+                    <div className="mt-8 flex flex-wrap gap-3 z-10">
+                      <Badge text="Python" />
+                      <Badge text="FastAPI" />
+                      <Badge text="Anthropic MCP" />
+                      <Badge text="Agentic Workflows" />
+                    </div>
+                  </div>
+
+                  {/* 2. STATUS CARD: CHESS (Span 4) */}
+                  <div className="md:col-span-4 bg-neutral-900/40 border border-neutral-800 p-6 md:p-8 flex flex-col justify-between hover:border-white/20 transition-all duration-300 relative overflow-hidden group">
+                    <div className="absolute -top-6 -right-6 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 rotate-12">
+                      <Brain size={180} />
+                    </div>
+                    <div className="z-10">
+                      <h3 className="text-[10px] font-bold uppercase text-gray-500 mb-2 tracking-widest flex items-center gap-2">
+                        <div className="w-1 h-1 bg-gray-500 rounded-full" />
+                        Competitive Chess
+                      </h3>
+                      <div className="text-5xl font-bold text-white mb-2 tracking-tighter">1/2 - 1/2</div>
+                      <p className="text-sm text-gray-400 leading-snug">
+                        Simultaneous Exhibition Draw vs. <br/>
+                        <span className="text-white font-semibold border-b border-gray-700 pb-0.5">Grandmaster Alexander Baburin</span>
+                      </p>
+                    </div>
+                    <div className="mt-8 text-[10px] text-gray-600 font-mono border-t border-gray-800 pt-4 z-10">
+                      // "You have to calculate the failure lattice before you make the move."
+                    </div>
+                  </div>
+
+                  {/* 3. TECHNICAL CARD: COMPILERS (Span 4) */}
+                  <div className="md:col-span-4 bg-neutral-900/40 border border-neutral-800 p-6 flex flex-col hover:border-white/20 transition-colors group">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="bg-neutral-800 w-8 h-8 flex items-center justify-center rounded border border-neutral-700">
+                         <Terminal size={16} className="text-gray-300" />
+                      </div>
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">Systems & Compilers</h3>
+                    </div>
+                    
+                    <ul className="space-y-3 text-xs text-gray-400 font-mono flex-grow">
+                      <li className="flex items-start gap-3 group/item">
+                        <span className="text-blue-500 mt-0.5 group-hover/item:translate-x-1 transition-transform">&gt;&gt;</span> 
+                        <div>
+                          <span className="text-gray-300">Genetic Chess Engine</span>
+                          <span className="block text-[10px] text-gray-600">Evolutionary heuristics, self-optimizing</span>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-3 group/item">
+                        <span className="text-blue-500 mt-0.5 group-hover/item:translate-x-1 transition-transform">&gt;&gt;</span> 
+                        <div>
+                          <span className="text-gray-300">Lisp Interpreter</span>
+                          <span className="block text-[10px] text-gray-600">Python implementation, lexical scope</span>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-3 group/item">
+                        <span className="text-blue-500 mt-0.5 group-hover/item:translate-x-1 transition-transform">&gt;&gt;</span> 
+                        <div>
+                          <span className="text-gray-300">C Compiler</span>
+                          <span className="block text-[10px] text-gray-600">Custom runtime, memory mgmt</span>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-3 group/item">
+                        <span className="text-blue-500 mt-0.5 group-hover/item:translate-x-1 transition-transform">&gt;&gt;</span> 
+                        <div>
+                          <span className="text-gray-300">Git Clone</span>
+                          <span className="block text-[10px] text-gray-600">Java implementation from scratch</span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* 4. VISUAL EPISTEMOLOGY / ART (Span 5) */}
+                  <div className="md:col-span-5 bg-neutral-900/40 border border-neutral-800 p-6 flex flex-col justify-between hover:border-white/20 transition-colors group">
+                     <div>
+                        <div className="flex justify-between items-center mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-neutral-800 p-2 rounded border border-neutral-700 text-gray-300">
+                              <Eye size={16} />
+                            </div>
+                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Visual Epistemology</h3>
+                          </div>
+                          <a href="/art-index" className="text-[10px] uppercase flex items-center gap-1 text-gray-500 hover:text-white transition-colors group/link">
+                            Full Index <ExternalLink size={10} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                          </a>
+                        </div>
+                        
+                        <p className="text-xs text-gray-400 leading-relaxed mb-6 border-l border-gray-800 pl-3">
+                          Training a neural net (my brain) on raw, 3D ground truth without photographic compression.
+                          A study in how images structure knowledge.
+                        </p>
+                     </div>
+                     
+                     {/* Mini Art Gallery Grid - Using aspect-[3/4] for portrait ratio */}
+                     <div className="grid grid-cols-3 gap-2 mt-auto">
+                        {PORTFOLIO_PREVIEW.map((img) => (
+                          <div key={img.id} className="aspect-[3/4] bg-neutral-800 relative group/img overflow-hidden rounded-sm border border-neutral-800">
+                            <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
+                            <img 
+                              src={img.src} 
+                              alt={img.alt}
+                              className="w-full h-full object-cover grayscale opacity-60 group-hover/img:grayscale-0 group-hover/img:opacity-100 group-hover/img:scale-110 transition-all duration-500"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-1 transform translate-y-full group-hover/img:translate-y-0 transition-transform duration-300">
+                              <p className="text-[8px] text-white text-center truncate">{img.title}</p>
+                            </div>
+                          </div>
+                        ))}
+                     </div>
+                  </div>
+
+                  {/* 5. RESEARCH & KNOWLEDGE (Span 3) - Updated Icon and Title */}
+                  <div className="md:col-span-3 bg-neutral-900/40 border border-neutral-800 p-6 flex flex-col hover:border-white/20 transition-colors">
+                    <div className="mb-6 flex items-center gap-3">
+                      <div className="bg-neutral-800 w-8 h-8 flex items-center justify-center rounded border border-neutral-700">
+                         <Database size={16} />
+                      </div>
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">Knowledge Systems</h3>
+                    </div>
+                    
+                    <div className="space-y-4 flex-grow">
+                      {WRITING_LINKS.map((link, i) => (
+                        <a key={i} href="#" className="block group/item p-3 -mx-3 rounded hover:bg-neutral-800/50 transition-colors">
+                          <div className="flex justify-between items-center mb-1">
+                            <p className="text-[9px] text-gray-500 uppercase tracking-widest">{link.year} • {link.type}</p>
+                            <span className="text-[9px] bg-neutral-800 text-gray-400 px-1.5 rounded border border-neutral-700">{link.tag}</span>
+                          </div>
+                          <div className="text-xs text-gray-300 group-hover/item:text-blue-400 leading-tight font-medium flex items-start justify-between gap-2">
+                            {link.title}
+                            <ExternalLink size={10} className="mt-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                    
+                    <a href="#" className="text-[10px] text-gray-500 hover:text-white flex items-center gap-1 uppercase tracking-wider mt-4 pt-4 border-t border-gray-800">
+                      Read all notes <ChevronRight size={10} />
+                    </a>
+                  </div>
+
+                  {/* 6. CONTACT / FOOTER (Span 12) */}
+                  <div className="md:col-span-12 bg-neutral-950 border border-dashed border-gray-800 p-4 md:p-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4">
+                     <div className="flex flex-col md:flex-row gap-6 font-mono w-full md:w-auto text-center md:text-left">
+                        <a href="mailto:aaronfung@systems-arch.app" className="hover:text-white flex items-center justify-center md:justify-start gap-2 transition-colors">
+                          <Mail size={14}/> aaronfung@systems-arch.app
+                        </a>
+                        <a href="https://github.com/technoir7" className="hover:text-white flex items-center justify-center md:justify-start gap-2 transition-colors">
+                          <GitBranch size={14}/> technoir7
+                        </a>
+                        <a href="#" className="hover:text-white flex items-center justify-center md:justify-start gap-2 transition-colors">
+                          <ExternalLink size={14}/> LinkedIn
+                        </a>
+                     </div>
+                     <div className="flex items-center gap-2 uppercase tracking-widest opacity-50 text-[10px]">
+                        <div className="w-2 h-2 bg-green-900 rounded-full" />
+                        System Status: Online
+                     </div>
+                  </div>
+
+                </div>
+              </main>
+            </div>
+          );
+        }
+
+        const container = document.getElementById('root');
+        // Added 'ReactDOM.' prefix to createRoot to prevent ReferenceError if React/ReactDOM are loaded separately
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
